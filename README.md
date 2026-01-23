@@ -1,5 +1,5 @@
 # Taylor
-Library to model mass transfer in Taylor flow columns
+Library pyTaylor3 to model mass transfer in Taylor flow columns
 To calculate the column Kla use the function Kla(Us,Rc,D,Ls,Lb,rho,g,mu,sigma)
 The input parameters are (all of them in units of the International System):
 Us average fluid velocity in the duct
