@@ -222,7 +222,7 @@ def Newprofiles(a,D,mu,sigma,Us,Rc,Ls):
 def Evolvedprofiles(D,rho,g,mu,sigma,Us,Rc,Lb,Ls):
 
 	ab0=an(1)
-	print(len(ab0))
+	#print(len(ab0))
 	for i in range(10):
 		suma1,afis=Newprofileb(ab0,D,rho,g,mu,sigma,Us,Rc,Lb)
 		af0=np.array(an(1))-np.array([0]+afis)
@@ -236,17 +236,17 @@ def Evolvedprofiles(D,rho,g,mu,sigma,Us,Rc,Lb,Ls):
 
 #Compute values for the upper cap
 def Kf(Ub,Us,Rb,Rc,D):
-	A=(float(3)/float(4))*(2*Us-Ub)-(float(2)/float(3))*((Rf/Rc)**2)*Us
-	B=(float(35)/float(12))*((Rf/Rc)**2)*Us
+	A=(0.5)*(2*Us-Ub)
+	B=(float(5)/float(2))*((Rb/Rc)**2)*Us
 	x=A/B
 	y=(A-B)*(1-(1-x)**0.5)+((float(2)/float(3))*B+A/float(3))*(1-(1-x)**(float(3)/float(2)))-(B/float(5))*(1-(1-x)**(float(5)/float(2)))
-	K=float(4)*(D*math.pi*(Rf**3)*y)**0.5
+	K=float(4)*(D*math.pi*(Rb**3)*y)**0.5
 	return K
 
 def Kla(Us,Rc,D,Ls,Lb,rho,g,mu,sigma):
 	
 	d_val,Ub=delta2(mu,Us,sigma,rho,Rc,g)
-	print(d_val)
+	#print(d_val)
 	Rb=Rc-d_val
 	Vs=math.pi*(Ls*(Rc**2)-float(4)*(Rc**3)/float(3))
 	
@@ -257,7 +257,7 @@ def Kla(Us,Rc,D,Ls,Lb,rho,g,mu,sigma):
 	
 	F_v=(Ub-Us)*math.pi*((Rc)**2)*fib+Kcaps_v
 	
-	return F_v/Vs
+	return F_v/Vs, (Ub-Us)*math.pi*((Rc)**2)*fib/Vs, Kcaps_v/Vs
 
 
 
