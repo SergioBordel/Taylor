@@ -24,6 +24,10 @@ import numpy as np
 from scipy.optimize import fsolve
 import numpy as np
 import matplotlib.pyplot as plt
+try:
+    trapz = np.trapezoid
+except AttributeError:
+    trapz = np.trapz
 
 #Physical properties
 #Viscosity of Water Reid, Robert C.; Prausnitz, John M.; Poling, Bruce E. (1987), The Properties of Gases and Liquids, McGraw-Hill Book Company
@@ -76,7 +80,12 @@ def ut(t, alpha, beta):
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_bvp, simps
+from scipy.integrate import solve_bvp
+
+try:
+    from scipy.integrate import simpson as simps
+except ImportError:
+    from scipy.integrate import simps
 import math
 
 def ode_system(x, Y, k):
@@ -127,7 +136,8 @@ def G(t,alpha,beta):
 	return g
 def X(t,alpha,beta,k,Rb,Us):
 	tc = np.arcsin(np.sqrt(alpha / beta))
-	x=(4*k*Rb/Us)*(fi(t,alpha,beta)-fi(tc,alpha,beta))/((np.sin(t)*ut(t,alpha,beta))**2)
+	with np.errstate(divide='ignore', invalid='ignore'):
+		x=(4*k*Rb/Us)*(fi(t,alpha,beta)-fi(tc,alpha,beta))/((np.sin(t)*ut(t,alpha,beta))**2)
 	return x
 
 def Ju1(alpha,beta,k,Rb,Us,D):
@@ -139,7 +149,7 @@ def Ju1(alpha,beta,k,Rb,Us,D):
 	compute_integral_vectorized = np.vectorize(compute_integral)
 	I_results = compute_integral_vectorized(X_values)
 	Integ=2*I_results*np.sin(t_values)
-	area_trapz = np.trapz(Integ, G_values)
+	area_trapz = trapz(Integ, G_values)
 
 	Ju=2*np.pi*(Rb**2)*np.sqrt(D*Us/(4*Rb))*area_trapz
 	residual=2*np.pi*(Rb**2)*np.sqrt(D*k)*((t_values[-1]/float(2))-np.sin(2*t_values[-1])/float(4))
@@ -155,7 +165,7 @@ def Ju2(alpha,beta,k,Rb,Us,D):
 	compute_integral_vectorized = np.vectorize(compute_integral)
 	I_results = compute_integral_vectorized(X_values)
 	Integ=2*I_results*np.sin(t_values)
-	area_trapz = np.trapz(Integ, G_values)
+	area_trapz = trapz(Integ, G_values)
 
 	Ju=2*np.pi*(Rb**2)*np.sqrt(D*Us/(4*Rb))*area_trapz
 	return Ju
@@ -175,7 +185,7 @@ def Jcyl(k,Rb,Rc,Us,Ub,alpha,beta,D,rho,mu_v,z_max):
 	compute_integral_vectorized = np.vectorize(compute_integral)
 	I_results = compute_integral_vectorized(X_values)
 	Integ=I_results/np.sqrt(z_values/uz+(fi(np.pi/2,alpha,beta)-fi(tc,alpha,beta))/(ut(np.pi/2,alpha,beta)**2))
-	area_trapz = np.trapz(Integ, z_values)
+	area_trapz = trapz(Integ, z_values)
 	Jcyl=2*np.pi*(Rb**2)*np.sqrt(D*Us/(4*Rb))*area_trapz
 	return Jcyl
 
@@ -202,7 +212,7 @@ def Jd2(k,Rb,Rc,Us,Ub,alpha,beta,D,rho,mu_v,z_max):
 	compute_integral_vectorized = np.vectorize(compute_integral)
 	I_results = compute_integral_vectorized(X_values)
 	Integ=2*I_results*np.sin(t_values)
-	area_trapz = np.trapz(Integ, G_values)
+	area_trapz = trapz(Integ, G_values)
 	Ju=2*np.pi*(Rb**2)*np.sqrt(D*Us/(4*Rb))*area_trapz
 	residual=2*np.pi*(Rb**2)*np.sqrt(D*k)*(((np.pi-t_values[-1])/float(2))-(np.sin(2*np.pi)-np.sin(2*t_values[-1]))/float(4))
 	Jd2=Ju+residual
@@ -223,7 +233,7 @@ def Jd1(alpha,beta,k,Rb,Us,D):
 	compute_integral_vectorized = np.vectorize(compute_integral)
 	I_results = compute_integral_vectorized(X_values)
 	Integ=2*I_results*np.sin(t_values)
-	area_trapz = np.trapz(Integ, G_values)
+	area_trapz = trapz(Integ, G_values)
 	Jd=2*np.pi*(Rb**2)*np.sqrt(D*Us/(4*Rb))*area_trapz
 	residual=-(2*np.pi*(Rb**2)*np.sqrt(D*k)*(((np.pi-tc-t_values[-1])/float(2))-(np.sin(2*(np.pi-tc))-np.sin(2*t_values[-1]))/float(4)))
 	Jd1=Jd+residual
@@ -248,8 +258,8 @@ def kla_op(k,Rc,Us,D,mu_v,sigma_v,rho,z_max):
 	u_ratio = Ub / Us
 	Rb=Rc-delta_val
 
-	alpha = (3.0 / 4.0) * (2 - u_ratio) - (2.0 / 3.0) * (Rb / Rc) ** 2
-	beta = (35.0 / 12.0) * (Rb / Rc) ** 2
+	alpha = (0.5) * (2 - u_ratio) 
+	beta = (5.0 / 2.0) * (Rb / Rc) ** 2
 	tc = np.arcsin(np.sqrt(alpha / beta))
 
 	kla_val=kla(k,Rb,Rc,Us,Ub,alpha,beta,D,rho,mu_v,z_max)
